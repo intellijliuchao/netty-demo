@@ -1,8 +1,8 @@
 package com.taione.netty.one;
 
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.ReferenceCountUtil;
 
 public class ServertHandler extends ChannelInboundHandlerAdapter {
 
@@ -19,13 +19,18 @@ public class ServertHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        Send send = (Send) msg;
-        System.out.println("client发送：" + send);
-        Receive receive = new Receive();
-        receive.setId(send.getId());
-        receive.setMessage(send.getMessage());
-        receive.setName(send.getName());
-        ctx.writeAndFlush(receive);
+        try {
+            // Do something with msg
+            Send send = (Send) msg;
+            System.out.println("client发送：" + send);
+            Receive receive = new Receive();
+            receive.setId(send.getId());
+            receive.setMessage(send.getMessage());
+            receive.setName(send.getName());
+            ctx.writeAndFlush(receive);
+        } finally {
+            ReferenceCountUtil.release(msg);
+        }
     }
 
     @Override
